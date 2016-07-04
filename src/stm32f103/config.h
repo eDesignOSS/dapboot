@@ -19,9 +19,11 @@
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
-#define APP_BASE_ADDRESS 0x08003000
+#define APP_BASE_ADDRESS 0x08002000
 #define FLASH_PAGE_SIZE  1024
 #define DFU_UPLOAD_AVAILABLE 1
 #define DFU_DOWNLOAD_AVAILABLE 1
+
+#define LANDING_PAGE_URL "devanlai.github.io/webdfu/dfu-util"
 
 #endif

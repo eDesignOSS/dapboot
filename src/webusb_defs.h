@@ -101,7 +101,7 @@ struct webusb_simple_origins {
         uint8_t bDescriptorType;
         uint8_t bFirstInterfaceNumber;
     } __attribute__((packed)) function_subset_header;
-    uint8_t iOrigin[16];
+    uint8_t iOrigin[];
 } __attribute__((packed));
 
 #define WEBUSB_ALLOWED_ORIGINS_HEADER_SIZE 5

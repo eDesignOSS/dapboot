@@ -49,7 +49,11 @@ static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
 void target_clock_setup(void) {
     /* Set system clock to 72 MHz */
+    #ifdef USE_HSI
+    rcc_clock_setup_in_hsi_out_72mhz();
+    #else
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
+    #endif
 }
 
 void target_gpio_setup(void) {

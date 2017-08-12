@@ -42,7 +42,7 @@ static void jump_to_application(void) __attribute__ ((noreturn));
 
 static void jump_to_application(void) {
     vector_table_t* app_vector_table = (vector_table_t*)APP_BASE_ADDRESS;
-    
+
     /* Use the application's vector table */
     target_relocate_vector_table();
 
@@ -51,7 +51,7 @@ static void jump_to_application(void) {
 
     /* Jump to the application entry point */
     app_vector_table->reset();
-    
+
     while (1);
 }
 
@@ -75,13 +75,13 @@ int main(void) {
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
         webusb_setup(usbd_dev, "devanlai.github.io/webdfu/dfu-util/");
         winusb_setup(usbd_dev);
-        
+
         while (1) {
             usbd_poll(usbd_dev);
         }
     } else {
         jump_to_application();
     }
-    
+
     return 0;
 }

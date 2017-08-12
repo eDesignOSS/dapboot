@@ -79,6 +79,23 @@ void target_gpio_setup(void) {
     }
 #endif
 
+    /* Setup Buttons */
+#if HAVE_BUTTON
+    {
+        const uint8_t mode = GPIO_MODE_INPUT;
+        const uint8_t conf = (BUTTON_EXT_PUPD ? GPIO_CNF_INPUT_FLOAT
+                                              : GPIO_CNF_INPUT_PULL_UPDOWN);
+
+        gpio_set_mode(BUTTON_GPIO_PORT, mode, conf, BUTTON_GPIO_PIN);
+
+        #if !BUTTON_EXT_PUPD && !BUTTON_ACTIVE_HIGH
+        gpio_set(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+        #else
+        gpio_clear(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+        #endif
+    }
+#endif
+
 #if HAVE_USB_PULLUP_CONTROL
     {
         const uint8_t mode = GPIO_MODE_OUTPUT_10_MHZ;

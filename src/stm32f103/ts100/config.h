@@ -45,4 +45,6 @@
 #define USES_GPIOB 1
 #define USES_GPIOC 1
 
+#define USE_HSE
+
 #endif

@@ -212,6 +212,15 @@ bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t hal
     /* Remember the bounds of erased data in the current page */
 
     while (half_word_count > 0) {
+        // Flash size check
+        #ifdef FLASH_SIZE
+        if ((long)dest >= 0x08000000 + FLASH_SIZE) {
+            // Just eat up unwritable data.
+            verified = false;
+            break;
+        }
+        #endif
+
         if (dest >= erase_end || dest < erase_start) {
             erase_start = get_flash_page_address(dest);
             erase_end = erase_start + (FLASH_PAGE_SIZE)/sizeof(uint16_t);

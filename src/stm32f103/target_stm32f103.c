@@ -45,6 +45,11 @@
 #define USES_GPIOC 0
 #endif
 
+#ifdef FLASH_SIZE_OVERRIDE
+_Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
+               "Incompatible flash size");
+#endif
+
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
 void target_clock_setup(void) {
@@ -182,11 +187,21 @@ void target_get_serial_number(char* dest, size_t max_chars) {
     desig_get_unique_id_as_string(dest, max_chars+1);
 }
 
-size_t target_get_max_firmware_size(void) {
-    uint8_t* flash_end = (void*)(FLASH_BASE + DESIG_FLASH_SIZE*1024);
-    uint8_t* flash_start = (void*)(APP_BASE_ADDRESS);
+static uint16_t* get_flash_end(void) {
+#ifdef FLASH_SIZE_OVERRIDE
+    /* Allow access to the unofficial full 128KiB flash size */
+    return (uint16_t*)(FLASH_BASE + FLASH_SIZE_OVERRIDE);
+#else
+    /* Only allow access to the chip's self-reported flash size */
+    return (uint16_t*)(FLASH_BASE + (size_t)DESIG_FLASH_SIZE*FLASH_PAGE_SIZE);
+#endif
+}
 
-    return (size_t)(flash_end - flash_start);
+size_t target_get_max_firmware_size(void) {
+    uint8_t* flash_end = (uint8_t*)get_flash_end();
+    uint8_t* flash_start = (uint8_t*)(APP_BASE_ADDRESS);
+
+    return (flash_end >= flash_start) ? (size_t)(flash_end - flash_start) : 0;
 }
 
 void target_relocate_vector_table(void) {
@@ -204,22 +219,21 @@ void target_flash_lock(void) {
 static inline uint16_t* get_flash_page_address(uint16_t* dest) {
     return (uint16_t*)(((uint32_t)dest / FLASH_PAGE_SIZE) * FLASH_PAGE_SIZE);
 }
-static uint16_t* erase_start;
-static uint16_t* erase_end;
+
 bool target_flash_program_array(uint16_t* dest, const uint16_t* data, size_t half_word_count) {
     bool verified = true;
 
     /* Remember the bounds of erased data in the current page */
+    static uint16_t* erase_start;
+    static uint16_t* erase_end;
 
+    const uint16_t* flash_end = get_flash_end();
     while (half_word_count > 0) {
-        // Flash size check
-        #ifdef FLASH_SIZE
-        if ((long)dest >= 0x08000000 + FLASH_SIZE) {
-            // Just eat up unwritable data.
+        /* Avoid writing past the end of flash */
+        if (dest >= flash_end) {
             verified = false;
             break;
         }
-        #endif
 
         if (dest >= erase_end || dest < erase_start) {
             erase_start = get_flash_page_address(dest);

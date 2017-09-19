@@ -53,12 +53,15 @@ _Static_assert((FLASH_BASE + FLASH_SIZE_OVERRIDE >= APP_BASE_ADDRESS),
 static const uint32_t CMD_BOOT = 0x544F4F42UL;
 
 void target_clock_setup(void) {
-    /* Set system clock to 72 MHz */
-    #ifdef USE_HSI
+#ifdef USE_HSI
+    /* Set the system clock to 48MHz from the internal RC oscillator.
+       The clock tolerance doesn't meet the official USB spec, but
+       it's better than nothing. */
     rcc_clock_setup_in_hsi_out_48mhz();
-    #else
+#else
+    /* Set system clock to 72 MHz from an external crystal */
     rcc_clock_setup_in_hse_8mhz_out_72mhz();
-    #endif
+#endif
 }
 
 void target_gpio_setup(void) {
@@ -88,20 +91,17 @@ void target_gpio_setup(void) {
     }
 #endif
 
-    /* Setup Buttons */
+    /* Setup the internal pull-up/pull-down for the button */
 #if HAVE_BUTTON
     {
         const uint8_t mode = GPIO_MODE_INPUT;
-        const uint8_t conf = (BUTTON_EXT_PUPD ? GPIO_CNF_INPUT_FLOAT
-                                              : GPIO_CNF_INPUT_PULL_UPDOWN);
-
+        const uint8_t conf = GPIO_CNF_INPUT_PULL_UPDOWN;
         gpio_set_mode(BUTTON_GPIO_PORT, mode, conf, BUTTON_GPIO_PIN);
-
-        #if !BUTTON_EXT_PUPD && !BUTTON_ACTIVE_HIGH
-        gpio_set(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
-        #else
-        gpio_clear(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
-        #endif
+        if (BUTTON_ACTIVE_HIGH) {
+            gpio_clear(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+        } else {
+            gpio_set(BUTTON_GPIO_PORT, BUTTON_GPIO_PIN);
+        }
     }
 #endif
 

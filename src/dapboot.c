@@ -47,6 +47,9 @@ static void jump_to_application(void) {
     /* Use the application's vector table */
     target_relocate_vector_table();
 
+    /* Do any necessary early setup for the application */
+    target_pre_main();
+
     /* Initialize the application's stack pointer */
     __set_MSP((uint32_t)(app_vector_table->initial_sp_value));
 
@@ -74,7 +77,7 @@ int main(void) {
 
         usbd_device* usbd_dev = usb_setup();
         dfu_setup(usbd_dev, &target_manifest_app, NULL, NULL);
-        webusb_setup(usbd_dev, "devanlai.github.io/webdfu/dfu-util/");
+        webusb_setup(usbd_dev);
         winusb_setup(usbd_dev);
 
         while (1) {

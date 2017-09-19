@@ -42,7 +42,6 @@ static void jump_to_application(void) __attribute__ ((noreturn));
 
 static void jump_to_application(void) {
     vector_table_t* app_vector_table = (vector_table_t*)APP_BASE_ADDRESS;
-    target_configure_hardware();
 
     /* Use the application's vector table */
     target_relocate_vector_table();

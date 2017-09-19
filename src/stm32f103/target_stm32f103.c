@@ -149,13 +149,6 @@ const usbd_driver* target_usb_init(void) {
     return &st_usbfs_v1_usb_driver;
 }
 
-void target_configure_hardware(void) {
-#ifdef TARGET_TS100
-    rcc_set_usbpre(0x1);
-    rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_USBEN | RCC_APB1ENR_I2C1EN);
-#endif
-}
-
 bool target_get_force_bootloader(void) {
     bool force = false;
     /* Check the RTC backup register */

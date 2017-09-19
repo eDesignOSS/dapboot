@@ -44,4 +44,6 @@
 
 #define USE_HSI
 
+void target_pre_main(void);
+
 #endif
